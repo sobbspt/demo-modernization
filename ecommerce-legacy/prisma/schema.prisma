@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the schema for the e-commerce system
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Define the User table to store user information
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  fullName  String
+  birthdate DateTime?
+  role      UserRole  @default(USER)
+  orders    Order[]
+  // Add other user-related fields as needed
+}
+
+// Define the ProductCatalog table to store product information
+model ProductCatalog {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  // Add other product-related fields as needed
+}
+
+// Define the ShoppingCart table to store shopping cart items
+model ShoppingCart {
+  id        Int @id @default(autoincrement())
+  userId    Int
+  productId Int
+  quantity  Int
+  // Add other shopping cart-related fields as needed
+}
+
+// Define the Inventory table to track product stock levels
+model Inventory {
+  id        Int @id @default(autoincrement())
+  productId Int
+  quantity  Int
+  // Add other inventory-related fields as needed
+}
+
+// Define the Order table to store order information
+model Order {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  orderDate  DateTime
+  orderItems OrderItem[]
+  // Add other order-related fields as needed
+  User       User        @relation(fields: [userId], references: [id])
+}
+
+// Define the Payment table to store payment information
+model Payment {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  paymentDate DateTime
+  amount      Float
+  // Add other payment-related fields as needed
+}
+
+// Define the Shipping table to store shipping information
+model Shipping {
+  id           Int      @id @default(autoincrement())
+  orderId      Int
+  shippingDate DateTime
+  // Add other shipping-related fields as needed
+}
+
+// Define the Delivery table to store delivery information
+model Delivery {
+  id           Int      @id @default(autoincrement())
+  orderId      Int
+  deliveryDate DateTime
+  // Add other delivery-related fields as needed
+}
+
+// Define the Authentication table to store authentication tokens
+model Authentication {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  token      String
+  expiration DateTime
+  // Add other authentication-related fields as needed
+}
+
+// Define the OrderItem table to store individual items within an order
+model OrderItem {
+  id        Int   @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  // Add other order item-related fields as needed
+  Order     Order @relation(fields: [orderId], references: [id])
+}
