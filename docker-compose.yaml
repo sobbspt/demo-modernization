@@ -23,3 +23,15 @@ services:
         condition: service_healthy
     links:
       - "db-legacy:db-legacy"
+    restart: on-failure
+
+  proxy:
+    container_name: proxy
+    image: nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - "./nginx.conf:/etc/nginx/nginx.conf:ro"
+    links:
+      - ecommerce-legacy
+    restart: on-failure
