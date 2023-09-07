@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  db-legacy:
+    container_name: db-legacy
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: app
+      MYSQL_DATABASE: ecomm-db
+    healthcheck: # check the healthiness with the following configuration
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '--user=root', '--password=app']
+
+  ecommerce-legacy:
+    container_name: ecommerce-legacy
+    build: ecommerce-legacy/
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: mysql://root:app@db-legacy:3306/ecomm-db
+    depends_on:
+      db-legacy:
+        condition: service_healthy
+    links:
+      - "db-legacy:db-legacy"
