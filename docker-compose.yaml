@@ -34,9 +34,11 @@ services:
       - "./nginx.conf:/etc/nginx/nginx.conf:ro"
     links:
       - ecommerce-legacy
+      - new-user-service
     restart: on-failure
     depends_on:
       - ecommerce-legacy
+      - new-user-service
 
   zoo1:
     image: confluentinc/cp-zookeeper:7.3.2
