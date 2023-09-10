@@ -31,17 +31,6 @@ model User {
   // Add other user-related fields as needed
 }
 
-model UserOutbox {
-  id        Int       @id @default(autoincrement())
-  username  String    @unique
-  email     String    @unique
-  password  String
-  fullName  String
-  birthdate DateTime?
-  role      UserRole  @default(USER)
-  // Add other user-related fields as needed
-}
-
 // Define the ProductCatalog table to store product information
 model ProductCatalog {
   id          Int    @id @default(autoincrement())

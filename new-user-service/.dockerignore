@@ -1,0 +1,21 @@
+# Ignore development and editor-specific files
+node_modules
+npm-debug.log
+yarn-error.log
+.vscode
+.idea
+
+# Ignore NestJS build files (if you're using the default "dist" output directory)
+dist
+
+# Ignore any sensitive or temporary files
+.env
+.env.*
+*.swp
+*.swo
+*.log
+*.out
+
+# Ignore version control directories and files
+.git
+.gitignore

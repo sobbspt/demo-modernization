@@ -23,10 +23,11 @@ export class UserService {
     });
   }
 
-  async create(payload: Prisma.UserCreateInput): Promise<UserIgnorePassword> {
+  async create(payload: Prisma.UserUncheckedCreateInput): Promise<UserIgnorePassword> {
     return await this.prisma.user.create(
       {
         data: {
+          id: payload.id,
           email: payload.email,
           fullName: payload.fullName,
           username: payload.username,

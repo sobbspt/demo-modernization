@@ -100,3 +100,30 @@ services:
       - OFFSET_STORAGE_TOPIC=my_connect_offsets
       - STATUS_STORAGE_TOPIC=my_connect_statuses
     restart: on-failure
+
+  db-user-service:
+    container_name: db-user-service
+    image: mysql:8
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: app
+      MYSQL_DATABASE: user-db
+    healthcheck: # check the healthiness with the following configuration
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '--user=root', '--password=app']
+  
+  new-user-service:
+    container_name: new-user-service
+    build: new-user-service/
+    ports:
+      - "3333:3333"
+    environment:
+      DATABASE_URL: mysql://root:app@db-user-service:3306/user-db
+      KAFKA_HOST: kafka1:29092
+    depends_on:
+      - db-user-service
+      - kafka1
+    links:
+      - db-user-service
+      - kafka1
+    restart: on-failure

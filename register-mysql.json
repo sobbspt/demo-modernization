@@ -10,7 +10,7 @@
         "database.server.id": "184054",
         "topic.prefix": "ecomm-db",
         "database.include.list": "ecomm-db",
-        "table.include.list": "ecomm-db.UserOutbox",
+        "table.include.list": "ecomm-db.User",
         "schema.history.internal.kafka.bootstrap.servers": "kafka1:29092",
         "schema.history.internal.kafka.topic": "schema-changes"
     }

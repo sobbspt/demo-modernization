@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the schema for the e-commerce system
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Define the User table to store user information
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  fullName  String
+  birthdate DateTime?
+  role      UserRole  @default(USER)
+  // Add other user-related fields as needed
+}
