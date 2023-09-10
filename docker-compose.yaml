@@ -21,5 +21,6 @@ services:
     depends_on:
       db-legacy:
         condition: service_healthy
+    restart: on-failure
     links:
       - "db-legacy:db-legacy"

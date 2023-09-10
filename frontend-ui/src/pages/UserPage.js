@@ -1,8 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
-import { useEffect, useState } from 'react';
-// @mui
 import {
   Card,
   Table,
@@ -18,20 +17,19 @@ import {
   TableCell,
   Container,
   Typography,
-  IconButton,
   TableContainer,
   TablePagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
-// components
 import Label from '../components/label';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
-// sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
-// mock
 import USERLIST from '../_mock/user';
-
-// ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'id', label: 'ID', alignRight: false },
@@ -41,8 +39,6 @@ const TABLE_HEAD = [
   { id: 'Role', label: 'Role', alignRight: false },
   { id: '' },
 ];
-
-// ----------------------------------------------------------------------
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -75,26 +71,25 @@ function applySortFilter(array, comparator, query) {
 
 export default function UserPage() {
   const [open, setOpen] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    role: '',
+  });
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   const [page, setPage] = useState(0);
-
   const [order, setOrder] = useState('asc');
-
   const [selected, setSelected] = useState([]);
-
   const [orderBy, setOrderBy] = useState('name');
-
   const [filterName, setFilterName] = useState('');
-
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // Define the API endpoint to fetch the user list
-    const apiUrl = 'http://localhost:3000/users'; // Replace with your API URL
+    const apiUrl = 'http://localhost:3000/users';
 
-    // Make an HTTP GET request to the API
     fetch(apiUrl)
       .then((response) => {
         if (!response.ok) {
@@ -103,21 +98,55 @@ export default function UserPage() {
         return response.json();
       })
       .then((data) => {
-        // Handle the successful response and set the user list in state
         setUsers(data);
       })
       .catch((error) => {
-        // Handle any errors here
         console.error('Error fetching user data:', error);
       });
-  }, [])
+  }, []);
 
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
+  const handleOpenMenu = () => {
+    setDialogOpen(true);
   };
 
-  const handleCloseMenu = () => {
-    setOpen(null);
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleAddUser = () => {
+    fetch('http://localhost:3000/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('User added successfully:', data);
+        setTimeout(() => {
+          fetch('http://localhost:3000/users')
+            .then((response) => response.json())
+            .then((updatedUsers) => {
+              setUsers(updatedUsers);
+            })
+            .catch((error) => {
+              console.error('Error fetching user data:', error);
+            });
+        }, 1000);
+        setDialogOpen(false);
+      })
+      .catch((error) => {
+        console.error('Error adding user:', error);
+      });
   };
 
   const handleRequestSort = (event, property) => {
@@ -165,15 +194,13 @@ export default function UserPage() {
   };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
-
   const filteredUsers = applySortFilter(users, getComparator(order, orderBy), filterName);
-
   const isNotFound = !filteredUsers.length && !!filterName;
 
   return (
     <>
       <Helmet>
-        <title> User | Minimal UI </title>
+        <title>User | Minimal UI</title>
       </Helmet>
 
       <Container>
@@ -181,8 +208,8 @@ export default function UserPage() {
           <Typography variant="h4" gutterBottom>
             User
           </Typography>
-          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            New User
+          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleOpenMenu}>
+            Add User
           </Button>
         </Stack>
 
@@ -216,7 +243,7 @@ export default function UserPage() {
 
                         <TableCell component="th" scope="row" padding="none">
                           <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt={username} src={"https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=Default&mouthType=Default&skinColor=Light"} />
+                            <Avatar alt={username} src={`https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=Default&mouthType=Default&skinColor=Light`} />
                             <Typography variant="subtitle2" noWrap>
                               {username}
                             </Typography>
@@ -252,7 +279,7 @@ export default function UserPage() {
                           </Typography>
 
                           <Typography variant="body2">
-                            No results found for &nbsp;
+                            No results found for&nbsp;
                             <strong>&quot;{filterName}&quot;</strong>.
                             <br /> Try checking for typos or using complete words.
                           </Typography>
@@ -280,7 +307,7 @@ export default function UserPage() {
       <Popover
         open={Boolean(open)}
         anchorEl={open}
-        onClose={handleCloseMenu}
+        onClose={handleCloseDialog}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         PaperProps={{
@@ -305,6 +332,70 @@ export default function UserPage() {
           Delete
         </MenuItem>
       </Popover>
+
+      {/* Add User Dialog */}
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Add New User</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Username"
+            name="username"
+            value={formData.username}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Role"
+            name="role"
+            value={formData.role}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Full name"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleAddUser} color="primary">
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
