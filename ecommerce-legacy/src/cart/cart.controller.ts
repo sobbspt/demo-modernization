@@ -12,15 +12,21 @@ export class CartController {
             products: [
                 {
                     name: 'Product A',
-                    basePrice: 1000.50,
+                    basePrice: 3000.50,
                     category: ProductCategory.Electronics,
                     quantity: 3,
+                },
+                {
+                    name: 'Product B',
+                    basePrice: 1250.11,
+                    category: ProductCategory.Clothing,
+                    quantity: 1,
                 }
             ],
             user: {
                 id: 1,
-                totalSpent: 0,
-                membershipDurationInYears: 0
+                totalSpent: 100000,
+                membershipDurationInYears: 3
             },
             couponCode: 'SAVE10'
         }

@@ -1,16 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CalculatePriceResult, Cart, CartResponse, ProductCategory } from './domain/cart.domain';
+import { PricingService } from './pricing.service';
+import { isEqual } from 'lodash'
 
 @Injectable()
 export class CartService {
+    private readonly logger = new Logger(CartService.name);
+
+    constructor(private readonly pricingService: PricingService) { }
+
     getCart(cart: Cart): CartResponse {
-        const { fullPrice, totalDiscount, couponCodeDiscount, totalPrice } = this.calculatePrice(cart)
+        const calculatedPrice = this.calculatePrice(cart);
+        const pricingServiceCalculationResult = this.pricingService.calculatePrice(cart);
+
+        if (!isEqual(calculatedPrice, pricingServiceCalculationResult)) {
+            this.logger.warn(`Prices from the two services do not match. calculatedPrice: ${JSON.stringify(calculatedPrice)} pricingServiceCalculationResult: ${JSON.stringify(pricingServiceCalculationResult)}`);
+        }
+
         return {
             ...cart,
-            fullPrice,
-            totalDiscount,
-            couponCodeDiscount,
-            totalPrice,
+            fullPrice: calculatedPrice.fullPrice,
+            totalDiscount: calculatedPrice.totalDiscount,
+            couponCodeDiscount: calculatedPrice.couponCodeDiscount,
+            totalPrice: calculatedPrice.totalPrice,
         }
     }
 
@@ -25,39 +37,33 @@ export class CartService {
             fullPrice += productPrice
 
             if (product.quantity >= 2) {
-                // Apply "Buy 2 get 1" discount
                 productPrice -= product.basePrice;
                 totalDiscount += product.basePrice
             }
 
             if (cart.user.totalSpent >= 1000) {
-                // Apply "Buy over 1000, get 20% discount" discount
                 const over1000Get20PercentAmount = productPrice * 0.2
                 productPrice *= 0.8;
                 totalDiscount += over1000Get20PercentAmount
             }
 
             if (cart.user.totalSpent >= 50000) {
-                // Apply "Over than 50,000, get 10% discount on top" discount
                 const over50000Get10PercentAmount = productPrice * 0.1
                 productPrice *= 0.9;
                 totalDiscount += over50000Get10PercentAmount
             }
 
             if (cart.user.membershipDurationInYears >= 2) {
-                // Apply "Over than 2 years membership, get 20% on top" discount (rare case)
                 const loyaltyDiscount = productPrice * 0.2
                 productPrice *= 0.8;
                 totalDiscount += loyaltyDiscount
             }
 
             if (product.category === ProductCategory.Electronics) {
-                // Apply additional 5% discount for electronics
                 const electronicsCategoryDiscount = productPrice * 0.05
                 productPrice *= 0.95;
                 totalDiscount += electronicsCategoryDiscount
             } else if (product.category === ProductCategory.Clothing) {
-                // Apply additional 10% discount for clothing
                 const clothingCategoryDiscount = productPrice * 0.1
                 productPrice *= 0.9;
                 totalDiscount += clothingCategoryDiscount
@@ -67,7 +73,6 @@ export class CartService {
         }
 
         if (cart.couponCode === "SAVE10") {
-            // Apply a coupon code discount of 10%
             const couponDiscountAmount = totalPrice * 0.1
             totalPrice *= 0.9
             couponCodeDiscount += couponDiscountAmount
