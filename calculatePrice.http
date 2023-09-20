@@ -1,0 +1,19 @@
+POST http://localhost:3000/carts/calculatePrice HTTP/1.1
+content-type: application/json
+
+{
+    "products": [
+        {
+            "name": "Product A",
+            "basePrice": 1000.50,
+            "category": 0,
+            "quantity": 3
+        }
+    ],
+    "user": {
+        "id": 1,
+        "totalSpent": 0,
+        "membershipDurationInYears": 0
+    },
+    "couponCode": "SAVE10"
+}
