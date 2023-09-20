@@ -15,7 +15,7 @@ export class PricingServiceV2 {
             { criteria: (_product: Product, user: User) => user.totalSpent >= 1000, multiplier: 0.8 },
             { criteria: (_product: Product, user: User) => user.totalSpent >= 50000, multiplier: 0.9 },
             { criteria: (_product: Product, user: User) => user.membershipDurationInYears >= 2, multiplier: 0.8 },
-            { criteria: (product: Product, _user: User) => product.category === ProductCategory.Electronics, multiplier: 0.95 },
+            // { criteria: (product: Product, _user: User) => product.category === ProductCategory.Electronics, multiplier: 0.95 },
             { criteria: (product: Product, _user: User) => product.category === ProductCategory.Clothing, multiplier: 0.9 },
         ];
 
