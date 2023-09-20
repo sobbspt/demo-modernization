@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Cart, CalculatePriceResult, ProductCategory } from "./domain/cart.domain";
 
 @Injectable()
-export class PricingService {
+export class LegacyPricingService {
     calculatePrice(cart: Cart): CalculatePriceResult {
         let totalPrice = 0;
         let couponCodeDiscount = 0;
