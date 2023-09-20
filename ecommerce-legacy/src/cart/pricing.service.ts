@@ -1,56 +1,65 @@
 import { Injectable } from "@nestjs/common";
-import { CalculatePriceResult, Cart, Product, ProductCategory, User } from "./domain/cart.domain";
+import { Cart, CalculatePriceResult, ProductCategory } from "./domain/cart.domain";
 
 @Injectable()
 export class PricingService {
     calculatePrice(cart: Cart): CalculatePriceResult {
-        const result: CalculatePriceResult = {
-            fullPrice: 0,
-            totalDiscount: 0,
-            couponCodeDiscount: 0,
-            totalPrice: 0,
-        };
-
-        const criteriaAndMultipliers = [
-            { criteria: (_product: Product, user: User) => user.totalSpent >= 1000, multiplier: 0.8 },
-            { criteria: (_product: Product, user: User) => user.totalSpent >= 50000, multiplier: 0.9 },
-            { criteria: (_product: Product, user: User) => user.membershipDurationInYears >= 2, multiplier: 0.8 },
-            { criteria: (product: Product, _user: User) => product.category === ProductCategory.Electronics, multiplier: 0.95 },
-            { criteria: (product: Product, _user: User) => product.category === ProductCategory.Clothing, multiplier: 0.9 },
-        ];
+        let totalPrice = 0;
+        let couponCodeDiscount = 0;
+        let fullPrice = 0;
+        let totalDiscount = 0;
 
         for (const product of cart.products) {
             let productPrice = product.basePrice * product.quantity
-            result.fullPrice += productPrice
+            fullPrice += productPrice
 
             if (product.quantity >= 2) {
                 productPrice -= product.basePrice;
-                result.totalDiscount += product.basePrice
+                totalDiscount += product.basePrice
             }
 
-            criteriaAndMultipliers.forEach(({ criteria, multiplier }) => {
-                if (criteria(product, cart.user)) {
-                    const discount = productPrice * (1 - multiplier)
-                    productPrice *= multiplier
-                    result.totalDiscount += discount
-                }
-            });
+            if (cart.user.totalSpent >= 1000) {
+                const over1000Get20PercentAmount = productPrice * 0.2
+                productPrice *= 0.8;
+                totalDiscount += over1000Get20PercentAmount
+            }
 
-            result.totalPrice += productPrice;
+            if (cart.user.totalSpent >= 50000) {
+                const over50000Get10PercentAmount = productPrice * 0.1
+                productPrice *= 0.9;
+                totalDiscount += over50000Get10PercentAmount
+            }
+
+            if (cart.user.membershipDurationInYears >= 2) {
+                const loyaltyDiscount = productPrice * 0.2
+                productPrice *= 0.8;
+                totalDiscount += loyaltyDiscount
+            }
+
+            if (product.category === ProductCategory.Electronics) {
+                const electronicsCategoryDiscount = productPrice * 0.05
+                productPrice *= 0.95;
+                totalDiscount += electronicsCategoryDiscount
+            } else if (product.category === ProductCategory.Clothing) {
+                const clothingCategoryDiscount = productPrice * 0.1
+                productPrice *= 0.9;
+                totalDiscount += clothingCategoryDiscount
+            }
+
+            totalPrice += productPrice;
         }
 
         if (cart.couponCode === "SAVE10") {
-            const couponDiscountAmount = result.totalPrice * 0.1;
-            result.totalPrice *= 0.9;
-            result.couponCodeDiscount += couponDiscountAmount;
+            const couponDiscountAmount = totalPrice * 0.1
+            totalPrice *= 0.9
+            couponCodeDiscount += couponDiscountAmount
         }
 
-        for (const key in result) {
-            if (result.hasOwnProperty(key)) {
-                result[key] = +result[key].toFixed(2);
-            }
+        return {
+            fullPrice: +fullPrice.toFixed(2),
+            totalDiscount: +totalDiscount.toFixed(2),
+            couponCodeDiscount: +couponCodeDiscount.toFixed(2),
+            totalPrice: +totalPrice.toFixed(2),
         }
-
-        return result;
     }
 }
