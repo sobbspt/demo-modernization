@@ -1,11 +1,8 @@
 import { isEqual } from 'lodash'
-import { CalculatePriceResult } from './domain/cart.domain';
 
-type ExperimentFunc = () => CalculatePriceResult
-
-export class PriceExperiment {
-    use: ExperimentFunc;
-    try: ExperimentFunc;
+export class PriceExperiment<T> {
+    use: () => T;
+    try: () => T;
     run = () => {
         const useResult = this.use()
         const tryResult = this.try()
