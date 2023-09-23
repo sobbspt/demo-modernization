@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 export type UserIgnorePassword = Omit<User, "password">
@@ -43,6 +43,24 @@ export class UserService {
           role: true,
           birthdate: true,
           username: true,
+        }
+      }
+    )
+  }
+
+  async update(payload: Prisma.UserUncheckedUpdateInput): Promise<void> {
+    await this.prisma.user.update(
+      {
+        where: {
+          id: payload.id as number,
+        },
+        data: {
+          email: payload.email,
+          fullName: payload.fullName,
+          username: payload.username,
+          password: await bcrypt.hash(payload.password as string, 10),
+          birthdate: payload.birthdate,
+          role: payload.role
         }
       }
     )

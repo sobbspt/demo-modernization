@@ -22,9 +22,15 @@ export class UserController {
   @MessagePattern('ecomm-db.ecomm-db.User')
   async getHello(@Payload() message: Message): Promise<void> {
     var payload = message.payload
+
     if (payload.op === 'c' || payload.op === 'r') {
-      console.log(payload.after.id)
       await this.userService.create(payload.after)
+      return
+    }
+
+    if (payload.op === 'u') {
+      await this.userService.update(payload.after)
+      return
     }
   }
 }
