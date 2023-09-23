@@ -1,6 +1,8 @@
+import { Injectable } from '@nestjs/common';
 import { isEqual } from 'lodash'
 
-export class PriceExperiment<T> {
+@Injectable()
+export class Experiment<T> {
     use: () => T;
     try: () => T;
     run = () => {
